@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matérias - Mindly</title>
+    <!-- Favicon — Ícone da aba do navegador -->
+    <link rel="icon" href="assets/logo.png" type="image/png">
+
+    <!-- Fonte Inter via Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 — Framework CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- AOS — Biblioteca de animações ao rolar a página -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Estilos globais do Mindly -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Script inline: aplica o tema antes da renderização -->
+    <script>
+        const temaSalvo = localStorage.getItem('theme');
+        const prefereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const temaInicial = temaSalvo || (prefereDark ? 'dark' : 'light');
+        if (temaInicial === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // Proteção de Rota (Simulação de Login)
+        document.addEventListener('DOMContentLoaded', () => {
+            const userLogged = localStorage.getItem('mindly_user_logged');
+            if(userLogged !== 'Alex') {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
+    <style>
+        /* Estilos específicos da página de Matérias */
+        .secao-materias {
+            padding: 4rem 1rem;
+        }
+
+        .card-materia {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-materia:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-color);
+        }
+
+        .icone-materia {
+            width: 70px;
+            height: 70px;
+            background: var(--bg-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .card-materia:hover .icone-materia {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-resumo-ia {
+            background: linear-gradient(135deg, #2196F3, #8E24AA);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 1.5rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-resumo-ia:hover {
+            opacity: 0.9;
+            color: white;
+        }
+
+        .filtro-materias {
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-filtro {
+            background: var(--bg-gray);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .btn-filtro.active, .btn-filtro:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid" style="max-width: 1300px;">
+            <a class="navbar-brand logo-container" href="dashboard.html">
+                <img src="assets/logo.png" alt="Mindly Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto ms-4">
+                    <li class="nav-item"><a class="nav-link" href="ferramentas.html">Ferramentas</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="materias.html">Matérias</a></li>
+                    <li class="nav-item"><a class="nav-link" href="simulados.html">Simulados</a></li>
+                    <li class="nav-item"><a class="nav-link" href="sobre.html">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suporte.html">Suporte</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" href="chat.html" style="color: var(--primary-color);">
+                            <i class="bi bi-robot me-1"></i> Mindly IA
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center auth-links">
+                    <a href="perfil.html" class="d-flex align-items-center text-decoration-none me-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" class="rounded-circle border border-2 border-primary me-2" width="35" height="35">
+                        <span class="fw-bold small d-none d-lg-inline" style="color: var(--text-main);">Alex</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container secao-materias">
+        <!-- Link de volta para Dashboard -->
+        <a href="dashboard.html" class="btn btn-outline-secondary rounded-pill mb-4" data-aos="fade-right">
+            <i class="bi bi-arrow-left me-2"></i> Voltar para o Dashboard
+        </a>
+
+        <header class="text-center mb-5" data-aos="fade-down">
+            <h1 class="display-4 fw-bold mb-3">O que vamos aprender hoje?</h1>
+            <p class="fs-5 text-muted">Explore as disciplinas do ENEM com suporte da nossa IA.</p>
+        </header>
+
+        <!-- BUSCA ESTILO PERPLEXITY -->
+        <section class="mb-5" data-aos="fade-up" data-aos-delay="100">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="input-group input-group-lg shadow-sm" style="border-radius: 20px; overflow: hidden; border: 2px solid var(--border-color);">
+                        <span class="input-group-text bg-white border-0"><i class="bi bi-search text-primary"></i></span>
+                        <input type="text" id="inputIA" class="form-control border-0 py-3 fs-5" placeholder="Pergunte ao Mindly Brain (ex: dicas de redação)..." aria-label="Busca IA">
+                        <button class="btn btn-primary px-4" type="button" onclick="perguntarIA()">Perguntar</button>
+                    </div>
+                    <div id="resultadoIA" class="mt-4 p-4 d-none" style="background: var(--bg-gray); border-radius: 20px; border: 1px solid var(--border-color);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-stars text-primary fs-4"></i>
+                            <h5 class="fw-bold mb-0">Resposta do Mindly Brain:</h5>
+                        </div>
+                        <p id="textoResultadoIA" class="mb-0 fs-6"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtros de Áreas do Conhecimento -->
+        <div class="filtro-materias" data-aos="fade-up" data-aos-delay="200">
+            <button class="btn-filtro active">Todas</button>
+            <button class="btn-filtro">Linguagens</button>
+            <button class="btn-filtro">Matemática</button>
+            <button class="btn-filtro">Natureza</button>
+            <button class="btn-filtro">Humanas</button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Matemática -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="100">
+                <a href="materia-matematica.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-calculator"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Matemática</h3>
+                            <p class="small text-muted mb-0">Álgebra, Geometria, Probabilidade e Estatística.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Matemática')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Biologia (Natureza) -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="200">
+                <a href="materia-natureza.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-capsule"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Natureza</h3>
+                            <p class="small text-muted mb-0">Biologia, Física e Química para o ENEM.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Natureza')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- História (Humanas) -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="300">
+                <a href="materia-humanas.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-book"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Humanas</h3>
+                            <p class="small text-muted mb-0">História, Geografia, Sociologia e Filosofia.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Humanas')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Linguagens -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="400">
+                <a href="materia-linguagens.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-chat-quote"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Linguagens</h3>
+                            <p class="small text-muted mb-0">Português, Literatura e Línguas Estrangeiras.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Linguagens')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Física (Natureza) -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="500">
+                <a href="materia-natureza.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-lightning-charge"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Física</h3>
+                            <p class="small text-muted mb-0">Mecânica, Termodinâmica, Óptica e Eletricidade.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Física')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Química (Natureza) -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="600">
+                <a href="materia-natureza.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-funnel"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Química</h3>
+                            <p class="small text-muted mb-0">Tabela Periódica, Reações, Soluções e Orgânica.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Química')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Geografia (Humanas) -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="700">
+                <a href="materia-humanas.html" class="text-decoration-none">
+                    <div class="card-materia">
+                        <div>
+                            <div class="icone-materia"><i class="bi bi-globe-americas"></i></div>
+                            <h3 class="h5 fw-bold mb-2">Geografia</h3>
+                            <p class="small text-muted mb-0">Geopolítica, Clima, População e Urbanização.</p>
+                        </div>
+                        <button class="btn-resumo-ia" onclick="event.preventDefault(); gerarResumo('Geografia')">
+                            <i class="bi bi-robot"></i> Resumo IA
+                        </button>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Filosofia/Sociologia -->
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="800">
+                <div class="card-materia">
+                    <div>
+                        <div class="icone-materia"><i class="bi bi-lightbulb"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Humanas</h3>
+                        <p class="small text-muted mb-0">Filosofia, Sociologia e Atualidades.</p>
+                    </div>
+                    <button class="btn-resumo-ia" onclick="gerarResumo('Humanas')">
+                        <i class="bi bi-robot"></i> Resumo IA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast de Notificação (Feedback da IA) -->
+    <div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 1100;">
+        <div id="toastIA" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-robot me-2"></i>
+                    <span id="toastMensagem">Solicitando resumo ao assistente...</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer container py-5 mt-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
+                <img src="assets/logo.png" alt="Mindly Logo" class="footer-logo mb-3">
+                <p class="text-muted mb-0">&copy; 2026 Mindly. Todos os direitos reservados.</p>
+            </div>
+            <div class="col-lg-6 text-center text-lg-end social-links">
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <a href="#"><i class="bi bi-linkedin"></i></a>
+                <a href="#"><i class="bi bi-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="theme.js"></script>
+    <!-- Base de Conhecimento para Treinamento de IA -->
+    <script src="knowledge_base.js"></script>
+
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        /**
+         * Função de perguntar para o Mindly Brain (Simulando Perplexity)
+         */
+        function perguntarIA() {
+            const input = document.getElementById('inputIA');
+            const boxResultado = document.getElementById('resultadoIA');
+            const textoResultado = document.getElementById('textoResultadoIA');
+            const query = input.value.trim();
+
+            if (!query) return;
+
+            // Mostra carregando
+            boxResultado.classList.remove('d-none');
+            textoResultado.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Pesquisando na base de treinamento...';
+
+            // Simula delay de processamento da IA
+            setTimeout(() => {
+                const resposta = buscarNaKnowledgeBase(query);
+                
+                if (resposta) {
+                    textoResultado.innerText = resposta;
+                } else {
+                    // Fallback se não tiver na KB local
+                    textoResultado.innerHTML = `Não encontrei isso no meu cérebro local no momento. Tente pesquisar com palavras-chave diferentes!`;
+                }
+            }, 1200);
+        }
+
+        /**
+         * Gera um resumo da matéria utilizando a IA Mindly local.
+         */
+        function gerarResumo(materia) {
+            const toastEl = document.getElementById('toastIA');
+            const toastMsg = document.getElementById('toastMensagem');
+            toastMsg.innerText = `IA Mindly: Preparando resumo inteligente de ${materia}...`;
+            
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+
+            setTimeout(() => {
+                const info = buscarNaKnowledgeBase(materia) || "Conteúdo detalhado disponível no módulo de aulas.";
+                toastMsg.innerHTML = `<strong>Resumo de ${materia}:</strong><br>${info}`;
+            }, 1500);
+        }
+    </script>
+    <!-- Botão Flutuante Mindly IA -->
+    <a href="chat.html" class="floating-ai-btn hover-pulse" title="Pergunte ao Mindly Brain">
+        <i class="bi bi-robot"></i>
+    </a>
+
+    <style>
+        .floating-ai-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .floating-ai-btn:hover {
+            transform: scale(1.1);
+            color: white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</body>
+
+</html>
+
