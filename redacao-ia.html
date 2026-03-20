@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corretor de Redação IA - Mindly</title>
+    <link rel="icon" href="assets/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const temaSalvo = localStorage.getItem('theme');
+        const prefereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const temaInicial = temaSalvo || (prefereDark ? 'dark' : 'light');
+        if (temaInicial === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // Proteção de Rota (Simulação de Login)
+        document.addEventListener('DOMContentLoaded', () => {
+            const userLogged = localStorage.getItem('mindly_user_logged');
+            if(userLogged !== 'Alex') {
+                window.location.href = 'login.html';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ duration: 800, once: true });
+            }
+        });
+    </script>
+    <style>
+        .essay-paper {
+            background: #fff;
+            color: #333;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-height: 900px;
+            position: relative;
+            background-image: linear-gradient(#e5e5e5 1px, transparent 1px);
+            background-size: 100% 2.2rem; /* Sincronizado com a altura da linha */
+            background-position: 0 1.1rem; /* Ajuste para o texto sentar na linha */
+        }
+        
+        [data-theme="dark"] .essay-paper {
+            background: #fdfdfd; 
+            color: #222;
+        }
+
+        .essay-textarea {
+            width: 100%;
+            min-height: 900px;
+            border: none;
+            background: transparent;
+            resize: none;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            line-height: 2.2rem; /* Altura da linha fixa */
+            padding: 1.1rem 3rem; /* Padding vertical alinhado com a linha */
+            color: inherit;
+            display: block;
+        }
+
+        .competencia-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nota-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar-analysis {
+            position: sticky;
+            top: 2rem;
+        }
+    </style>
+</head>
+<body style="background: var(--bg-body);">
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid" style="max-width: 1300px;">
+            <a class="navbar-brand logo-container" href="dashboard.html">
+                <img src="assets/logo.png" alt="Mindly Logo">
+            </a>
+            <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center auth-links">
+                    <a href="perfil.html" class="d-flex align-items-center text-decoration-none me-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" class="rounded-circle border border-2 border-primary me-2" width="35" height="35">
+                        <span class="fw-bold small d-none d-lg-inline" style="color: var(--text-main);">Alex</span>
+                    </a>
+                </div>
+                <a href="dashboard.html" class="btn btn-outline-primary ms-3 rounded-pill fw-bold">Voltar ao Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <!-- Link de volta para Dashboard -->
+        <a href="dashboard.html" class="btn btn-outline-secondary rounded-pill mb-4" data-aos="fade-right">
+            <i class="bi bi-arrow-left me-2"></i> Voltar para o Dashboard
+        </a>
+
+        <div class="row g-5">
+            <div class="col-lg-8" data-aos="fade-right">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0" style="color: var(--text-main);">Corretor de Redação IA</h2>
+                    <div class="text-muted small fw-bold">
+                        <span id="charCount">0</span> caracteres | <span id="lineCount">0</span>/30 linhas
+                    </div>
+                </div>
+
+                <div class="essay-paper shadow-sm">
+                    <textarea class="essay-textarea" id="essayInput" placeholder="Comece seu rascunho aqui..." oninput="updateStats()"></textarea>
+                </div>
+                
+                <div class="mt-4 d-flex gap-2">
+                    <button class="btn btn-solid px-5 py-3 hover-pulse" onclick="analisarRedacao()">
+                        <i class="bi bi-cpu me-2"></i> Analisar com Mindly Brain
+                    </button>
+                    <button class="btn btn-outline-secondary px-4 py-3 rounded-pill" onclick="limparTexto()">Limpar</button>
+                </div>
+            </div>
+
+            <div class="col-lg-4" data-aos="fade-left">
+                <div class="sidebar-analysis">
+                    <div id="statusIA" class="text-center py-5 d-none">
+                        <div class="spinner-grow text-primary mb-3" role="status"></div>
+                        <h5 class="fw-bold" style="color: var(--text-main);">Processando Análise...</h5>
+                        <p class="text-muted small">Avaliando gramática, coesão e estrutura argumentativa.</p>
+                    </div>
+
+                    <div id="resultadoIA" class="d-none">
+                        <!-- Score Total -->
+                        <div class="card p-4 border-0 shadow-lg mb-4" style="border-radius: 20px; background: var(--bg-card);">
+                            <div class="text-center">
+                                <h6 class="text-muted fw-bold text-uppercase small">Nota Estimada</h6>
+                                <h1 class="display-3 fw-800 color-primary mb-0" id="notaTotal">---</h1>
+                                <p class="text-muted mt-2">Nível: <span class="badge bg-success">Excelente</span></p>
+                            </div>
+                            <hr class="my-3">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+
+                        <!-- Detalhes por Competência -->
+                        <h5 class="fw-bold mb-3" style="color: var(--text-main);">Detalhamento ENEM</h5>
+                        
+                        <div class="competencia-card d-flex align-items-start gap-3">
+                            <div class="nota-badge">160</div>
+                            <div>
+                                <h6 class="fw-bold mb-1" style="color: var(--text-main);">C1: Gramática</h6>
+                                <p class="small text-muted mb-0">Poucos desvios, mas cuidado com a regência verbal no 2º parágrafo.</p>
+                            </div>
+                        </div>
+
+                        <div class="competencia-card d-flex align-items-start gap-3">
+                            <div class="nota-badge">200</div>
+                            <div>
+                                <h6 class="fw-bold mb-1" style="color: var(--text-main);">C2: Tema/Estrutura</h6>
+                                <p class="small text-muted mb-0">Excelente compreensão do tema e repertório legitimado.</p>
+                            </div>
+                        </div>
+
+                        <div class="competencia-card d-flex align-items-start gap-3">
+                            <div class="nota-badge" style="background: #f39c12;">120</div>
+                            <div>
+                                <h6 class="fw-bold mb-1" style="color: var(--text-main);">C5: Intervenção</h6>
+                                <p class="small text-muted mb-0">Sua proposta precisa de mais detalhamento no agente social.</p>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-100 rounded-pill py-3 mt-3 shadow-sm">
+                            <i class="bi bi-file-earmark-pdf me-2"></i> Baixar Relatório Completo
+                        </button>
+                    </div>
+
+                    <div id="placeholderIA" class="card p-5 text-center border-0 hover-lift" style="border-radius: 20px; background: rgba(var(--primary-rgb), 0.05);">
+                        <i class="bi bi-stars fs-1 color-primary mb-3"></i>
+                        <h6 class="fw-bold" style="color: var(--text-main);">Aguardando seu texto</h6>
+                        <p class="text-muted small">Escreva pelo menos 7 linhas para uma análise precisa.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        function updateStats() {
+            const text = document.getElementById('essayInput').value;
+            document.getElementById('charCount').innerText = text.length;
+            
+            // Simulação de contagem de linhas
+            const lines = text.split('\n').length;
+            const lineCount = Math.min(30, Math.floor(text.length / 100) + lines);
+            document.getElementById('lineCount').innerText = lineCount;
+        }
+
+        function limparTexto() {
+            document.getElementById('essayInput').value = '';
+            updateStats();
+        }
+
+        async function analisarRedacao() {
+            const text = document.getElementById('essayInput').value;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            
+            if (words < 100) {
+                alert('Sua redação precisa de pelo menos 100 palavras para uma análise criteriosa do ENEM.');
+                return;
+            }
+
+            document.getElementById('placeholderIA').classList.add('d-none');
+            document.getElementById('statusIA').classList.remove('d-none');
+            document.getElementById('resultadoIA').classList.add('d-none');
+
+            // --- Motor de Análise Mindly Brain (MASSIVAMENTE Treinado) ---
+            const textLower = text.toLowerCase();
+            const lines = text.split('\n').filter(l => l.trim().length > 0);
+            
+            // Verificação de tipologia textual profunda
+            const argumentativos = ['importante', 'fundamental', 'essencial', 'necessário', 'inadmissível', 'problema', 'desafio', 'crucial', 'urgente', 'lamentável', 'deve-se', 'notório', 'evidente', 'impulsiona', 'agrava', 'consequência', 'causa', 'impacto', 'nota-se', 'constata-se', 'é imperativo', 'urge', 'é mister', 'comprova-se', 'salienta-se', 'ressalta-se', 'mitigar', 'fomentar', 'alicerce', 'intrínseco', 'corrobora', 'efêmero', 'utópico'];
+            const qtdArgumentativos = argumentativos.filter(a => textLower.includes(a)).length;
+
+            if (lines.length < 3) {
+                alert('Erro Crítico Estrutural: O sistema identificou uma quebra gravíssima do formato dissertativo-argumentativo pela falta de separação em parágrafos. Uma redação ENEM exige no mínimo a tricotomia introdução-desenvolvimento-conclusão.');
+            }
+
+            if (qtdArgumentativos < 4) {
+                alert('Tese Inexistente / Tipologia Inválida: O algoritmo detectou menos de 4 marcadores claros de defesa de opinião (juízo de valor). Seu texto parece um artigo expositivo, notícia ou resumo narrativo. O projeto de texto no ENEM exige tese forte e explícita!');
+            }
+
+            // Dicionários Massivos de Treinamento
+            const cliches = ['atualmente no brasil', 'no mundo em que vivemos', 'cada vez mais', 'desde os primórdios', 'nos dias de hoje', 'é preciso conscientizar', 'fechar com chave de ouro', 'um grande problema', 'como já dizia', 'fazer a sua parte', 'a união faz a força'];
+            const qtdCliches = cliches.filter(c => textLower.includes(c)).length;
+
+            const marcasOralidade = ['né', 'tá', 'tipo assim', 'com certeza', 'a gente vê que', 'pra', 'pro', 'daí', 'então', 'coisa', 'negócio'];
+            const qtdOralidade = marcasOralidade.filter(o => new RegExp(`\\b${o}\\b`, 'i').test(text)).length;
+
+            const verbosPrimeiraPessoa = /\b(eu|nós|meu|nosso|penso|acho|acredito|vejo|vivemos|temos|sabemos|precisamos|percebemos|notamos)\b/ig;
+            const qtdPrimeiraPessoa = (text.match(verbosPrimeiraPessoa) || []).length;
+            
+            if (qtdCliches > 1 || qtdOralidade > 0) {
+                alert('Análise Lexical: Seu texto possui clichês (senso comum) ou marcas de oralidade/informalidade ("atualmente", "nos dias de hoje", "pra"). Evite estruturas "batidas".');
+            }
+
+            // Cálculo de Riqueza Vocabular (Diversidade)
+            const palvrasArray = textLower.match(/\b\w{4,}\b/g) || []; // Palavras com 4 ou mais letras
+            const vocabulosUnicos = new Set(palvrasArray).size;
+            const taxaDiversidade = palvrasArray.length > 0 ? (vocabulosUnicos / palvrasArray.length) : 0; // Ideal ENEM > 0.45 em textos normais
+
+            // Competência 1: Norma Culta (Nível Punitivo Extremo)
+            let c1 = 40; 
+            if (words > 280) c1 += 40; 
+            
+            const virgulas = (text.match(/,/g) || []).length;
+            const pontos = (text.match(/\./g) || []).length;
+            
+            if (pontos > 4 && virgulas > 8) c1 += 40;
+            if (qtdPrimeiraPessoa === 0 && qtdOralidade === 0) c1 += 40;
+            if (taxaDiversidade > 0.45) c1 += 40; // Premia vocabulário rico
+            
+            // Punições C1
+            if (qtdOralidade > 0) c1 -= (qtdOralidade * 20);
+            if (words > 300 && virgulas < 5) c1 -= 80; // Muito texto, quase sem pausa
+            if (pontos > 0 && (words / pontos) > 40) c1 -= 60; // Frases enormes de 40 palavras sem ponto
+            if (c1 > 160 && qtdCliches > 0) c1 = 160; // Clichês e gírias travam o 200 na C1 e C4
+
+            // Competência 2: Estrutura (Tema, Tipologia e Repertório Pesado)
+            let c2 = 0; 
+            if (lines.length === 3) c2 += 80;
+            if (lines.length >= 4 && lines.length <= 5) c2 += 120; // 4 ou 5 parágrafos
+            if (lines.length > 5) c2 -= 40; // Fragmentação em 6+ parágrafos perde ponto
+
+            const repertorios = ['segundo', 'conforme', 'de acordo com', 'citou', 'filósofo', 'sociólogo', 'história', 'diz', 'afirma', 'constituição', 'estudo', 'dados', 'ibge', 'século', 'artigo', 'lei', 'pesquisa', 'documentário', 'filme', 'série', 'autor', 'escritor', 'mitologia', 'revolução', 'teoria'];
+            const qtdRepertoriosEncontrados = repertorios.filter(r => textLower.includes(r)).length;
+            
+            if (qtdRepertoriosEncontrados >= 3) c2 += 80; // Repertório produtivo exige pluralidade
+            else if (qtdRepertoriosEncontrados >= 1) c2 += 40;
+
+            if (qtdArgumentativos < 2) c2 = 40; // Falhou na tipologia (zera C2)
+
+            // Competência 3: Argumentação (Coerência e Projeto de Texto Avançado)
+            let c3 = Math.min(120, qtdArgumentativos * 20); // Baseia fortemente na defesa do argumento
+            
+            const projetoTexto = ['por outro lado', 'além disso', 'nesse sentido', 'sob esse viés', 'sob essa ótica', 'neste ínterim', 'paralelamente', 'de maneira análoga', 'consequência disso', 'fatores motivadores', 'em contrapartida', 'com efeito', 'vale ressaltar', 'não obstante', 'consoante a isso'];
+            const qtdProjetoInfo = projetoTexto.filter(p => textLower.includes(p)).length;
+            
+            if (qtdProjetoInfo >= 3) c3 += 40;
+            if (qtdProjetoInfo >= 5) c3 += 40;
+            
+            if (qtdRepertoriosEncontrados < 1 && c3 > 120) c3 = 120; // Argumentação rasa sem repertório não passa de 120
+            if (qtdCliches > 1) c3 -= 40; // Argumentação pautada em senso comum
+            if (qtdPrimeiraPessoa > 1) c3 -= 40;
+
+            // Competência 4: Coesão (Análise Matemática Inter e Intra parágrafos)
+            let c4 = 0;
+            const coesivosBasicos = ['portanto', 'logo', 'dessa forma', 'entretanto', 'todavia', 'visto que', 'posto que', 'contudo', 'ademais', 'porém', 'sendo assim', 'em suma', 'por causa de', 'devido a', 'já que', 'pois', 'porque'];
+            const coesivosAvancados = ['em primeiro plano', 'inicialmente', 'mormente', 'em segunda análise', 'outrossim', 'por conseguinte', 'em contrapartida', 'destarte', 'dessarte', 'por reflexo', 'sob tal premissa', 'indubitavelmente', 'decerto', 'haja vista', 'por analogia'];
+            
+            const countBasicos = coesivosBasicos.filter(c => textLower.includes(c)).length;
+            const countAvancados = coesivosAvancados.filter(c => textLower.includes(c)).length;
+            
+            // Requer número massivo de conexões para 200
+            c4 += Math.min(120, countBasicos * 20);
+            c4 += Math.min(80, countAvancados * 30);
+            
+            // Punições C4: Repetição lexica ou texto "blocado"
+            if (lines.length >= 4 && countAvancados === 0) c4 = Math.min(120, c4); // Sem operador culto entre parágrafos, não passa de 120
+            if (taxaDiversidade < 0.35) c4 -= 40; // Muitas repetições de pronomes/palavras
+
+            // Competência 5: Proposta de Intervenção (Obrigatoriedade Cirúrgica dos 5 Elementos)
+            let c5 = 0;
+            const agentes = /(governo|estado|escola|sociedade|ministério|mídia|família|ong|poder público|receita federal|polícia|sus|ong|iniciativa privada|empresas|poder legislativo|judiciário)/i;
+            const acoes = /(deve|precisa|necessita|cabe|urge|tem o dever|é imperativo que|invista|promova|crie|desenvolva|mitigue|fomente|garanta|assegure|proporcione)/i;
+            const modos = /(por meio de|através de|mediante|com o uso de|por intermédio de|por via de|a partir de)/i;
+            const efeitos = /(com o intuito de|para que|objetivando|a fim de|com o fito de|com o propósito de|visando|com a finalidade de)/i;
+            const detalhamentos = /(como|a exemplo de|que é|isto é|ou seja|cujo objetivo específico|especialmente|tais como|principalmente|notadamente|abrangendo|que se foca em)/i;
+            
+            if (agentes.test(text)) c5 += 40;
+            if (acoes.test(text)) c5 += 40;
+            if (modos.test(text)) c5 += 40;
+            if (efeitos.test(text)) c5 += 40;
+            if (detalhamentos.test(text)) c5 += 40;
+
+            // Restrição Máxima na C5: Se o texto for curto demais ou não tiver finalidade E modo claros, perde os últimos pontos.
+            if (c5 === 200 && (!modos.test(text) || !efeitos.test(text))) c5 = 160;
+            if (c5 >= 160 && lines.length < 3) c5 -= 40; // Proposta isolada sem desenvolvimento
+
+            // Normalização Matemática e Teto de Validação [0, 200] por competência
+            c1 = Math.min(200, Math.max(0, c1));
+            c2 = Math.min(200, Math.max(0, c2));
+            c3 = Math.min(200, Math.max(0, c3));
+            c4 = Math.min(200, Math.max(0, c4));
+            c5 = Math.min(200, Math.max(0, c5));
+
+            const notaTotal = c1 + c2 + c3 + c4 + c5;
+            
+            // Feedbacks hiper-detalhados baseados na análise lexical
+            const feedbacks = {
+                c1: c1 >= 160 ? "Mestria! Vocabulário diversificado e pontuação complexa corretíssima." : (c1 >= 120 ? `Bom, mas sua taxa de diversidade vocabular é ${(taxaDiversidade*100).toFixed(1)}% (tente >45%) e cuidado com períodos longos.` : "Cuidado extremo. Frases longas demais, oralidade ou gramática pobre afundaram a nota."),
+                c2: c2 >= 160 ? `Excelente. Textura de ${lines.length} parágrafos com ${qtdRepertoriosEncontrados} tipos de repertório ativados.` : (c2 >= 120 ? "Perdeu pontos pelo uso limitado de repertório legitimado de fora dos textos motivadores." : `Nota gravíssima. Estrutura falhada (${lines.length} parágrafos detectados) ou falta de teoria válida.`),
+                c5: c5 >= 160 ? "Os 5 pilares absolutos (Agente, Ação, Modo, Efeito, Detalhamento) foram validados pelo algoritmo." : (c5 >= 120 ? "Ação e Agente estão aí, mas faltou estruturar explicitamente o Meio ('por meio de') ou a Finalidade ('a fim de')." : "Intervenção embrionária. Faltou praticamente tudo para resolver o problema estruturado.")
+            };
+
+            setTimeout(() => {
+                document.getElementById('statusIA').classList.add('d-none');
+                document.getElementById('resultadoIA').classList.remove('d-none');
+                
+                // Atualiza UI
+                document.getElementById('notaTotal').innerText = notaTotal;
+                
+                // Atualiza Cards
+                const cards = document.querySelectorAll('.competencia-card');
+                cards[0].querySelector('.nota-badge').innerText = c1;
+                cards[0].querySelector('p').innerText = feedbacks.c1;
+                
+                cards[1].querySelector('.nota-badge').innerText = c2;
+                cards[1].querySelector('p').innerText = feedbacks.c2;
+                
+                cards[2].querySelector('.nota-badge').innerText = c5;
+                cards[2].querySelector('p').innerText = feedbacks.c5;
+                
+                renderRadar([c1, c2, c3, c4, c5]);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 2000);
+        }
+
+        let currentChart = null;
+        function renderRadar(stats) {
+            if (currentChart) currentChart.destroy();
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['C1', 'C2', 'C3', 'C4', 'C5'],
+                    datasets: [{
+                        label: 'Seu Desempenho',
+                        data: stats,
+                        backgroundColor: 'rgba(239, 68, 35, 0.2)',
+                        borderColor: '#EF4423',
+                        pointBackgroundColor: '#EF4423'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: { 
+                            beginAtZero: true, 
+                            max: 200,
+                            ticks: { display: false },
+                            grid: { color: 'rgba(128,128,128,0.1)' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

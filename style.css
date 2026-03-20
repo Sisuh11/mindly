@@ -1,0 +1,649 @@
+/* ============================================================
+   style.css — Estilos globais do Mindly
+   Organização:
+   1. Variáveis de tema (claro e escuro)
+   2. Sobrescritas de tema escuro
+   3. Reset e base global
+   4. Tipografia auxiliar
+   5. Botões
+   6. Navbar
+   7. Seções da página inicial
+   8. Rodapé
+   9. Formulários de autenticação
+  10. Media queries responsivas
+   ============================================================ */
+
+
+/* ============================================================
+   1. VARIÁVEIS DE TEMA — Tema Claro (padrão)
+   ============================================================ */
+:root {
+    --primary-color: #EF4423;       /* Laranja principal do protótipo */
+    --primary-hover: #D83A1B;       /* Laranja mais escuro para hover */
+    --text-main: #1A1A1A;           /* Cor principal do texto */
+    --text-muted: #555555;          /* Cor de texto secundário/suave */
+    --bg-light: #FFFFFF;            /* Fundo claro principal */
+    --bg-gray: #F2F2F2;             /* Fundo cinza suave para seções */
+    --border-blue: #2196F3;         /* Cor de destaque azul (borda/badge) */
+    --check-orange: #E67E22;        /* Laranja para ícones de checagem */
+    --nav-bg: #FFFFFF;              /* Fundo da navbar */
+    --border-color: #f0f0f0;        /* Cor padrão de bordas */
+    --card-bg: #FFFFFF;             /* Fundo de cards e containers */
+    --bg-body: #FFFFFF;             /* Alias para fundo do corpo */
+}
+
+
+/* ============================================================
+   2. VARIÁVEIS DE TEMA — Tema Escuro
+   ============================================================ */
+[data-theme="dark"] {
+    --primary-color: #EF4423;
+    --primary-hover: #D83A1B;
+    --text-main: #FFFFFF;
+    --text-muted: #BDBDBD;
+    --bg-light: #121212;
+    --bg-gray: #1E1E1E;
+    --border-blue: #2196F3;
+    --check-orange: #E67E22;
+    --nav-bg: #1A1A1A;
+    --border-color: #333333;
+    --card-bg: #1A1A1A;
+    --bg-body: #121212;
+}
+
+
+/* ============================================================
+   2.1. SOBRESCRITAS DO TEMA ESCURO — Textos e elementos gerais
+   ============================================================ */
+
+/* Otimização do tema escuro: removendo seletores genéricos !important para melhor performance */
+[data-theme="dark"] body {
+    background-color: var(--bg-light);
+    color: var(--text-main);
+}
+
+[data-theme="dark"] body {
+    background-color: var(--bg-light) !important;
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .text-muted {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .text-primary {
+    color: var(--border-blue) !important;
+}
+
+[data-theme="dark"] .bg-secondary {
+    background-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+/* Fundos de seções com cinza customizado */
+[data-theme="dark"] .bg-gray-custom,
+[data-theme="dark"] .bg-light-custom {
+    background-color: var(--bg-gray) !important;
+}
+
+/* Cards e containers de interface */
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .pricing-card,
+[data-theme="dark"] .chat-container,
+[data-theme="dark"] .pomodoro-container,
+[data-theme="dark"] .auth-form-container {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Sidebar de autenticação no tema escuro */
+[data-theme="dark"] .auth-sidebar {
+    background: linear-gradient(135deg, #A12B13 0%, #4A1259 100%) !important;
+}
+
+/* Ajustes Globais para Elementos Bootstrap no Dark Mode */
+[data-theme="dark"] .form-label, 
+[data-theme="dark"] .form-check-label,
+[data-theme="dark"] .form-check {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .table {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .table thead th,
+[data-theme="dark"] .table thead td {
+    color: var(--text-muted) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] select.form-select {
+    background-color: var(--bg-gray) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+
+/* ============================================================
+   3. RESET E BASE GLOBAL
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    line-height: 1.6;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Remove decoração de links e aplica transição suave */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+
+/* ============================================================
+   4. TIPOGRAFIA AUXILIAR
+   ============================================================ */
+
+/* Classe utilitária para aplicar a cor primária ao texto */
+.primary-color {
+    color: var(--primary-color) !important;
+}
+
+
+/* ============================================================
+   5. BOTÕES
+   ============================================================ */
+
+/* Sobrescrevendo o btn-primary do Bootstrap com a nossa cor */
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+}
+
+/* Botão sólido principal — usado em chamadas para ação (CTA) */
+.btn-solid {
+    background-color: var(--primary-color);
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-solid:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Efeito de pulso suave ao passar o mouse */
+.hover-pulse:hover {
+    transform: scale(1.05);
+}
+
+.hover-lift {
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
+}
+
+.hover-lift:hover {
+    transform: translate3d(0, -8px, 0) scale(1.02);
+    box-shadow: 0 15px 45px rgba(0,0,0,0.12);
+}
+
+/* Animação de fade-in para carregamento de página */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Skeleton Loading (Efeito de carregamento elegante) */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-gray) 25%, var(--border-color) 50%, var(--bg-gray) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
+/* ============================================================
+   6. NAVBAR GLOBAL
+   ============================================================ */
+.navbar-custom {
+    padding: 1rem 2rem;
+    background-color: var(--nav-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Contêiner do logo na navbar */
+.logo-container {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.logo-container img {
+    height: 60px;
+}
+
+/* Links de navegação padrão */
+.navbar-custom .nav-link {
+    color: var(--primary-color, #EF4423);
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin: 0 1rem;
+    transition: color 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+    color: var(--primary-hover);
+}
+
+/* Link ativo: sublinhado e peso maior */
+.navbar-custom .nav-link.active {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    font-weight: 600;
+    color: #333 !important;
+}
+
+/* Links inativos têm a cor primária */
+.navbar-custom .nav-link:not(.active) {
+    color: var(--primary-color, #EF4423);
+}
+
+/* Links de autenticação (Entrar / Criar conta) */
+.auth-links a {
+    color: var(--primary-color, #EF4423);
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    margin-left: 1rem;
+}
+
+.auth-links a:hover {
+    color: var(--primary-hover);
+}
+
+
+/* ============================================================
+   7. SEÇÕES DA PÁGINA INICIAL
+   ============================================================ */
+
+/* --- Hero --- */
+.hero {
+    text-align: center;
+    padding: 3rem 1rem 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 2.5rem;
+}
+
+/* Contêiner dos botões de CTA do hero */
+.hero-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+
+/* --- Seção de Ferramentas/Recursos --- */
+.features {
+    padding: 2rem 5% 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.features h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 2.5rem;
+}
+
+/* Card de recurso com hover animado */
+.feature-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+}
+
+.feature-card img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+/* Conteúdo textual do card de recurso */
+.feature-content {
+    padding: 1.5rem 0.5rem;
+    text-align: left;
+    flex: 1;
+}
+
+.feature-content h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.feature-content p {
+    line-height: 1.4;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+
+/* --- Seção "Como Funciona" --- */
+.how-it-works {
+    padding: 4rem 5% 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.how-it-works h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+
+/* --- Seção de Benefícios --- */
+.benefits {
+    padding: 4rem 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Lista de benefícios em coluna */
+.benefits-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.benefits-list li {
+    font-size: 1.3rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Ícone de checkmark circular laranja */
+.icon-check {
+    color: white;
+    background-color: #D67A43;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+
+/* --- Chamada para Ação Final (CTA Final) --- */
+.final-cta {
+    text-align: center;
+    padding: 2rem 5% 6rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.final-cta h2 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    margin-bottom: 2.5rem;
+}
+
+
+/* ============================================================
+   8. RODAPÉ (FOOTER)
+   ============================================================ */
+
+.footer-logo {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+/* Estilo do rodapé e seus ícones de redes sociais são definidos
+   nas páginas individuais via classes do Bootstrap e variáveis CSS */
+
+
+/* ============================================================
+   9. FORMULÁRIOS DE AUTENTICAÇÃO (Login / Cadastro)
+   ============================================================ */
+
+/* Layout principal da tela de autenticação */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Painel lateral colorido (visível apenas em desktop) */
+.auth-sidebar {
+    flex: 1;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #8E24AA 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    color: white;
+    text-align: center;
+}
+
+.auth-sidebar img {
+    max-width: 80%;
+    margin-bottom: 2rem;
+}
+
+/* Contêiner do formulário de autenticação */
+.auth-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: var(--bg-light);
+}
+
+/* Formulário centralizado com largura máxima */
+.auth-form {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-form h2 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.auth-form p {
+    margin-bottom: 2rem;
+}
+
+/* Campo de entrada customizado (e-mail, senha, nome) */
+.form-control-custom {
+    background-color: var(--bg-gray);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-control-custom:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: var(--bg-light);
+}
+
+/* Botão de login social (Google, Apple, etc.) */
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    font-weight: 500;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.social-login-btn:hover {
+    background-color: var(--bg-gray);
+}
+
+.social-login-btn i {
+    font-size: 1.2rem;
+}
+
+
+/* ============================================================
+  10. MEDIA QUERIES — Responsividade global
+   ============================================================ */
+
+/* Em telas menores que 992px: navbar mobile */
+@media (max-width: 991.98px) {
+    /* Remove margem dos links de auth no menu mobile */
+    .auth-links a {
+        margin-left: 0;
+    }
+
+    .auth-links {
+        padding-left: 1rem;
+        margin-left: 0;
+    }
+
+    /* Oculta o painel lateral nos formulários de autenticação */
+    .auth-sidebar {
+        display: none;
+    }
+}
+
+/* Em telas menores que 768px: layout mobile completo */
+@media (max-width: 767.98px) {
+    /* Reduz padding e tamanho de fonte do hero */
+    .hero {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+    }
+
+    /* Reduz padding nas seções principais */
+    .features,
+    .benefits,
+    .how-it-works,
+    .hero-tools,
+    .support-hero,
+    .about-hero {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    /* Títulos de páginas internas menores */
+    .about-hero h1,
+    .support-hero h1,
+    .hero-tools h1 {
+        font-size: 2.5rem;
+    }
+
+    /* Imagem dos cards de recurso menor em mobile */
+    .feature-card img {
+        height: 250px;
+    }
+
+    /* CTA final com menos padding */
+    .final-cta {
+        padding: 2rem 1rem 4rem;
+    }
+
+    .final-cta h2 {
+        font-size: 1.6rem;
+    }
+
+    /* Placeholder de imagem de ferramenta menor */
+    .tool-image-placeholder {
+        height: 200px;
+    }
+
+    /* Ícone grande menor em telas pequenas */
+    .huge-icon {
+        font-size: 4rem;
+    }
+}

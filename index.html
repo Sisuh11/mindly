@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindly - Seu aprendizado potencializado</title>
+    <meta name="description" content="Mindly: App de estudos para ENEM, organização estudantil e aprendizado com IA.">
+    <!-- Favicon — Ícone da aba do navegador -->
+    <link rel="icon" href="assets/logo.png" type="image/png">
+
+    <!-- Fonte Inter via Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 — Framework CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- AOS — Biblioteca de animações ao rolar a página -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Estilos globais do Mindly -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Script inline: aplica o tema antes da renderização para evitar "flash" de tema errado -->
+    <script>
+        const temaSalvo = localStorage.getItem('theme');
+        const prefereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const temaInicial = temaSalvo || (prefereDark ? 'dark' : 'light');
+        if (temaInicial === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+</head>
+
+<body>
+    <!-- ============================================================
+         NAVBAR — Barra de navegação principal
+         ============================================================ -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid" style="max-width: 1300px;">
+
+            <!-- Logo com link para a página inicial -->
+            <a class="navbar-brand logo-container" href="index.html">
+                <img src="assets/logo.png" alt="Mindly Logo">
+            </a>
+
+            <!-- Botão hambúrguer para menu mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Links de navegação colapsáveis -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto ms-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="ferramentas.html">Ferramentas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sobre.html">Sobre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="suporte.html">Suporte</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" href="chat.html" style="color: var(--primary-color);">
+                            <i class="bi bi-robot me-1"></i> Mindly IA
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Links de autenticação e botão de tema (injetado pelo theme.js) -->
+                <div class="d-flex flex-column flex-lg-row align-items-lg-center auth-links mt-3 mt-lg-0 mb-3 mb-lg-0">
+                    <a href="login.html" class="mb-2 mb-lg-0 me-lg-3 text-decoration-none" style="color: var(--text-main);">Entrar</a>
+                    <a href="cadastro.html" class="btn btn-primary rounded-pill px-4">Começar agora</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- ============================================================
+             SEÇÃO HERO — Chamada principal da página
+             ============================================================ -->
+        <section class="hero container text-center py-5">
+            <h1 class="display-3 fw-bold mb-3" data-aos="fade-down">Mindly</h1>
+            <p class="fs-4 fw-semibold mb-5" data-aos="fade-up" data-aos-delay="100">
+                Seu aprendizado, potencializado por tecnologia.
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap" data-aos="fade-up" data-aos-delay="200">
+                <!-- Link textual para login -->
+                <a href="login.html"
+                   class="btn-text"
+                   style="color: var(--primary-color); font-weight: 500; text-decoration: none; display: flex; align-items: center;">
+                    Comece agora
+                </a>
+                <!-- Botão de CTA principal -->
+                <a href="cadastro.html" class="btn-solid hover-pulse">Teste gratuitamente</a>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SEÇÃO DE RECURSOS — Cards com funcionalidades principais
+             ============================================================ -->
+        <section class="features container py-5 text-center">
+            <h2 class="mb-5 fw-semibold" data-aos="fade-up">Ferramentas que impulsionam seus estudos</h2>
+
+            <div class="row g-4">
+                <!-- Card 1: IA -->
+                <div class="col-12 col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card h-100">
+                        <img src="assets/feature1.png" alt="Aprendizado com Inteligência Artificial" class="img-fluid">
+                        <div class="feature-content p-3 text-start">
+                            <h3 class="fs-5 fw-bold mb-2">Aprendizado com Inteligência Artificial</h3>
+                            <p class="mb-0 text-muted">Acompanhe seu progresso e receba recomendações personalizadas
+                                para evoluir nos estudos de forma eficiente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Métodos de aprendizado -->
+                <div class="col-12 col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card h-100">
+                        <img src="assets/feature2.png" alt="Diversas formas de aprender" class="img-fluid">
+                        <div class="feature-content p-3 text-start">
+                            <h3 class="fs-5 fw-bold mb-2">Diversas formas de aprender</h3>
+                            <p class="mb-0 text-muted">Estude por simulados, resumos organizados e diferentes métodos
+                                que se adaptam ao seu estilo de aprendizado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Foco e produtividade -->
+                <div class="col-12 col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card h-100">
+                        <img src="assets/feature3.png" alt="Mais foco, melhores resultados" class="img-fluid">
+                        <div class="feature-content p-3 text-start">
+                            <h3 class="fs-5 fw-bold mb-2">Mais foco, melhores resultados</h3>
+                            <p class="mb-0 text-muted">Organize seus estudos, mantenha a constância e alcance seus
+                                objetivos com mais clareza e produtividade.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SEÇÃO "COMO FUNCIONA" — Passo a passo de uso
+             ============================================================ -->
+        <section class="how-it-works container py-5">
+            <h2 class="mb-4 fw-semibold" data-aos="fade-right">Como Funciona?</h2>
+            <div class="row g-4 text-start rounded-4 p-4 p-md-5"
+                 style="background-color: var(--bg-gray); border: 3px solid var(--border-blue);"
+                 data-aos="zoom-in">
+                <!-- Passo 1 -->
+                <div class="col-12 col-md-4">
+                    <h3 class="fs-4 fw-semibold mb-3">1. Crie sua conta</h3>
+                    <p class="text-muted mb-0">Comece gratuitamente em poucos segundos</p>
+                </div>
+                <!-- Passo 2 -->
+                <div class="col-12 col-md-4">
+                    <h3 class="fs-4 fw-semibold mb-3">2. Escolha a matéria</h3>
+                    <p class="text-muted mb-0">Acesse conteúdos e simulados organizados</p>
+                </div>
+                <!-- Passo 3 -->
+                <div class="col-12 col-md-4">
+                    <h3 class="fs-4 fw-semibold mb-3">3. Acompanhe seu progresso</h3>
+                    <p class="text-muted mb-0">Veja sua evolução e foque no que precisa melhorar</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SEÇÃO DE BENEFÍCIOS — Por que usar o Mindly?
+             ============================================================ -->
+        <section class="benefits container py-5">
+            <div class="row g-0 rounded-4 overflow-hidden"
+                 style="background-color: var(--bg-gray);"
+                 data-aos="fade-up">
+
+                <!-- Coluna esquerda: vantagens -->
+                <div class="col-12 col-md-6 p-5">
+                    <h3 class="fs-3 fw-medium mb-4" data-aos="fade-right" data-aos-delay="100">
+                        Por que usar o Mindly?
+                    </h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0" data-aos="fade-right" data-aos-delay="200">
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Organização automática
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Estudos personalizados
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Aulas gratuitas
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Simulados inteligentes
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Evolução acompanhada por IA
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Divisor vertical no desktop, horizontal no mobile -->
+                <div class="col-12 d-block d-md-none border-top border-secondary opacity-25"></div>
+                <div class="d-none d-md-flex align-items-center justify-content-center"
+                     style="width: 1px; background-color: #D1D1D1; margin: 3rem 0;"></div>
+
+                <!-- Coluna direita: público-alvo -->
+                <div class="col flex-grow-1 p-5 d-flex flex-column justify-content-center">
+                    <h3 class="fs-3 fw-medium mb-4" data-aos="fade-left" data-aos-delay="100">Ideal para:</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0" data-aos="fade-left" data-aos-delay="200">
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Estudantes do ENEM
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Quem quer melhorar notas
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Quem tem dificuldades de organização
+                        </li>
+                        <li class="d-flex align-items-center gap-3 fs-5 fw-medium">
+                            <span class="icon-check">✔</span> Quem quer estudar com tecnologia
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SEÇÃO CTA FINAL — Chamada para criação de conta
+             ============================================================ -->
+        <section class="final-cta text-center py-5 mb-5 container" data-aos="zoom-in">
+            <h2 class="fs-3 fw-medium mb-4">Pronto para evoluir nos seus estudos?</h2>
+            <a href="cadastro.html" class="btn-solid hover-pulse">Criar sua conta gratuitamente</a>
+        </section>
+    </main>
+
+    <!-- ============================================================
+         RODAPÉ — Links institucionais e redes sociais
+         ============================================================ -->
+    <footer class="site-footer">
+        <div class="container" style="max-width: 1200px;">
+            <div class="row g-4">
+                <!-- Coluna 1: Logo e descrição -->
+                <div class="col-12 col-md-4">
+                    <img src="assets/logo.png" alt="Mindly Logo" class="footer-logo">
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 300px;">
+                        O Mindly utiliza inteligência artificial e metodologias ativas para revolucionar como você
+                        estuda e conquista sua aprovação.
+                    </p>
+                    <!-- Ícones de redes sociais -->
+                    <div class="social-icons">
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                        <a href="#"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Links do produto -->
+                <div class="col-6 col-md-2 offset-md-1">
+                    <h4 class="footer-heading">Produto</h4>
+                    <ul class="footer-links">
+                        <li><a href="ferramentas.html">Ferramentas</a></li>
+                        <li><a href="pomodoro.html">Cronômetro</a></li>
+                        <li><a href="planos.html">Planos e Preços</a></li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 3: Links institucionais -->
+                <div class="col-6 col-md-2">
+                    <h4 class="footer-heading">Empresa</h4>
+                    <ul class="footer-links">
+                        <li><a href="sobre.html">Sobre nós</a></li>
+                        <li><a href="#">Carreiras</a></li>
+                        <li><a href="suporte.html">Contato</a></li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 4: Links de suporte e legal -->
+                <div class="col-12 col-md-3">
+                    <h4 class="footer-heading">Suporte</h4>
+                    <ul class="footer-links">
+                        <li><a href="suporte.html">Central de Ajuda</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Rodapé inferior: copyright -->
+            <div class="footer-bottom">
+                <p>&copy; 2026 Mindly. Todos os direitos reservados.</p>
+                <div style="color: var(--text-muted); font-size: 0.9em;">
+                    Feito com <i class="bi bi-heart-fill text-danger"></i> para estudantes.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS — Necessário para comportamentos interativos (navbar, collapse) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS — Biblioteca de animações ao rolar -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Inicializa as animações AOS com duração de 800ms, disparando apenas uma vez
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    </script>
+    <!-- Botão Flutuante Mindly IA -->
+    <a href="chat.html" class="floating-ai-btn hover-pulse" title="Pergunte ao Mindly Brain">
+        <i class="bi bi-robot"></i>
+    </a>
+
+    <style>
+        .floating-ai-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .floating-ai-btn:hover {
+            transform: scale(1.1);
+            color: white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+
+    <!-- Gerenciador de tema claro/escuro -->
+    <script src="theme.js"></script>
+</body>
+
+</html>
