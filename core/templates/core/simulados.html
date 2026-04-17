@@ -1,0 +1,633 @@
+﻿<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulados - Mindly</title>
+    <!-- Favicon — Ícone da aba do navegador -->
+    <link rel="icon" href="{% static 'core/assets/logo.png' %}" type="image/png">
+
+    <!-- Fonte Inter via Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 — Framework CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- AOS — Biblioteca de animações ao rolar a página -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Estilos globais do Mindly -->
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+
+    <!-- Script inline: aplica o tema antes da renderização -->
+    <script>
+        const temaSalvo = localStorage.getItem('theme');
+        const prefereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const temaInicial = temaSalvo || (prefereDark ? 'dark' : 'light');
+        if (temaInicial === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // Proteção de Rota (Simulação de Login)
+        document.addEventListener('DOMContentLoaded', () => {
+            const userLogged = localStorage.getItem('mindly_user_logged');
+            if(userLogged !== 'Alex') {
+                window.location.href = "{% url 'core:login' %}";
+            }
+        });
+    </script>
+
+    <style>
+        /* Estilos específicos da página de Simulados */
+        .secao-simulados {
+            padding: 4rem 1rem;
+        }
+
+        .card-simulado {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-simulado:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .badge-dificuldade {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .dificuldade-facil { background: #dcfce7; color: #166534; }
+        .dificuldade-media { background: #fef9c3; color: #854d0e; }
+        .dificuldade-dificil { background: #fee2e2; color: #991b1b; }
+
+        .info-simulado {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-simulado i {
+            color: var(--primary-color);
+            margin-right: 5px;
+        }
+
+        .btn-iniciar-simulado {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-iniciar-simulado:hover {
+            background: var(--primary-hover);
+        }
+
+        .feature-ia-simulado {
+            background: rgba(33, 150, 243, 0.05);
+            border: 1px dashed #2196F3;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        [data-theme="dark"] .feature-ia-simulado {
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        .icone-ia {
+            font-size: 2rem;
+            color: #2196F3;
+        }
+
+        .cronometro-box {
+            background: var(--bg-gray);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            font-family: monospace;
+        }
+
+        /* Overlay de Prova Realista */
+        #provaOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .pergunta-card {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        .alternativa-item {
+            display: flex;
+            align-items: center;
+            padding: 1.2rem 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .alternativa-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .alternativa-item.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .option-letter {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid currentColor;
+            margin-right: 15px;
+            font-weight: 800;
+        }
+
+        .question-meta {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .timer-badge {
+            background: var(--bg-gray);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid" style="max-width: 1300px;">
+            <a class="navbar-brand logo-container" href="{% url 'core:dashboard' %}">
+                <img src="{% static 'core/assets/logo.png' %}" alt="Mindly Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto ms-4">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:ferramentas' %}">Ferramentas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:materias' %}">Matérias</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'core:simulados' %}">Simulados</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:sobre' %}">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:suporte' %}">Suporte</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" href="{% url 'core:chat' %}" style="color: var(--primary-color);">
+                            <i class="bi bi-robot me-1"></i> Mindly IA
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center auth-links">
+                    <a href="{% url 'core:perfil' %}" class="d-flex align-items-center text-decoration-none me-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" class="rounded-circle border border-2 border-primary me-2" width="35" height="35">
+                        <span class="fw-bold small d-none d-lg-inline" style="color: var(--text-main);">Alex</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container secao-simulados">
+        <header class="text-center mb-5" data-aos="fade-down">
+            <h1 class="display-4 fw-bold mb-3">Treine para o sucesso</h1>
+            <p class="fs-5 text-muted">Simulados focados no ENEM com correção instantânea por IA.</p>
+        </header>
+
+        <!-- BUSCA ESTILO PERPLEXITY (SIMULADOS) -->
+        <section class="mb-5" data-aos="fade-up" data-aos-delay="100">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="input-group input-group-lg shadow-sm" style="border-radius: 20px; overflow: hidden; border: 2px solid var(--border-color);">
+                        <span class="input-group-text bg-white border-0"><i class="bi bi-robot text-primary"></i></span>
+                        <input type="text" id="inputIASimulado" class="form-control border-0 py-3 fs-5" placeholder="Pergunte sobre simulados ou estratégias de prova..." aria-label="Busca IA">
+                        <button class="btn btn-primary px-4" type="button" onclick="perguntarIASimulado()">Analisar</button>
+                    </div>
+                    <div id="resultadoIASimulado" class="mt-4 p-4 d-none" style="background: var(--bg-gray); border-radius: 20px; border: 1px solid var(--border-color);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-4"></i>
+                            <h5 class="fw-bold mb-0">Insights do Mindly Brain:</h5>
+                        </div>
+                        <p id="textoResultadoIASimulado" class="mb-0 fs-6"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-5">
+            <!-- Painel de Controle de Prova -->
+            <div class="col-lg-4" data-aos="fade-right">
+                <div class="cronometro-box shadow-sm">
+                    <h4 class="fw-bold mb-3">Tempo de Prova</h4>
+                    <div class="timer-display" id="timer">00:00:00</div>
+                    <p class="small text-muted mt-2">Simule o tempo real do ENEM para ganhar agilidade.</p>
+                    <button class="btn btn-outline-primary rounded-pill w-100 mt-3" onclick="toggleTimer()">
+                        <i class="bi bi-play-fill" id="btnIcon"></i> Iniciar Cronômetro
+                    </button>
+                </div>
+
+                <div class="feature-ia-simulado">
+                    <div class="icone-ia"><i class="bi bi-cpu"></i></div>
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: #2196F3;">Análise IA</h5>
+                        <p class="small mb-2 text-muted">A IA analisa seus erros e sugere o que estudar primeiro.</p>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="solicitarAnaliseIA()">
+                            Solicitar Análise
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listagem de Simulados -->
+            <div class="col-lg-8" data-aos="fade-left">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0">Disponíveis</h3>
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown">
+                            Filtrar por Área
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">ENEM Completo</a></li>
+                            <li><a class="dropdown-item" href="#">Matemática</a></li>
+                            <li><a class="dropdown-item" href="#">Natureza</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="vstack gap-4">
+                    <!-- Simulado 1 -->
+                    <div class="card-simulado">
+                        <span class="badge-dificuldade dificuldade-facil">Fácil</span>
+                        <h4 class="fw-bold mb-2">Simulado Start: Primeiros Passos</h4>
+                        <p class="text-muted">Focado nos temas que mais caem no ENEM há 5 anos.</p>
+                        <div class="info-simulado">
+                            <span><i class="bi bi-list-check"></i> 10 Questões</span>
+                            <span><i class="bi bi-clock"></i> 30 Minutos</span>
+                        </div>
+                        <button class="btn-iniciar-simulado" onclick="iniciarSimuladoReal()">
+                            Começar Agora
+                        </button>
+                    </div>
+
+                    <!-- Simulado 2 -->
+                    <div class="card-simulado">
+                        <span class="badge-dificuldade dificuldade-media">Média</span>
+                        <h4 class="fw-bold mb-2">Maratona Natureza & Matemática</h4>
+                        <p class="text-muted">O maior desafio técnico para quem quer medicina.</p>
+                        <div class="info-simulado">
+                            <span><i class="bi bi-list-check"></i> 90 Questões</span>
+                            <span><i class="bi bi-clock"></i> 5 Horas</span>
+                        </div>
+                        <button class="btn-iniciar-simulado">Começar Agora</button>
+                    </div>
+
+                    <!-- Simulado 3 -->
+                    <div class="card-simulado">
+                        <span class="badge-dificuldade dificuldade-dificil">Difícil</span>
+                        <h4 class="fw-bold mb-2">ENEM 2024: Simulação Real</h4>
+                        <p class="text-muted">Prova completa com redação e análise de notas por IA.</p>
+                        <div class="info-simulado">
+                            <span><i class="bi bi-list-check"></i> 180 Questões</span>
+                            <span><i class="bi bi-clock"></i> 5.5 Horas</span>
+                        </div>
+                        <button class="btn-iniciar-simulado">Começar Agora</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Overlay de Prova (Injetado via JS) -->
+    <div id="provaOverlay">
+        <div class="container py-5">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <img src="{% static 'core/assets/logo.png' %}" width="40">
+                <div class="d-flex gap-4 align-items-center">
+                    <div class="timer-badge"><i class="bi bi-clock me-2"></i> Questão: <span id="qTimer">00:00</span></div>
+                    <div class="timer-badge bg-dark text-white"><i class="bi bi-stopwatch me-2"></i> Total: <span id="totalTimer">00:00</span></div>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="finalizarProvaPrecoce()">Sair da Prova</button>
+                </div>
+            </div>
+
+            <div id="questionContainer" class="animate-fade-in">
+                <!-- Pergunta injetada aqui -->
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center max-w-800 mx-auto mt-4 px-4">
+                <button class="btn btn-light rounded-pill px-4" id="btnPrev" onclick="mudarQuestao(-1)">Anterior</button>
+                <div class="small fw-bold">Questão <span id="currentQNum">1</span> de 10</div>
+                <button class="btn btn-primary rounded-pill px-5 fw-bold" id="btnNext" onclick="mudarQuestao(1)">Próxima</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados TRI (Injetado via JS) -->
+    <div id="resultadoTRIOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-body); z-index:2100; padding:3rem; overflow-y:auto;">
+        <div class="container max-w-800">
+            <div class="text-center mb-5">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                <h1 class="display-4 fw-800 mt-3">Sua Nota TRI Estimada</h1>
+                <p class="fs-4 fw-bold text-primary" id="notaTRIValue">calculando...</p>
+            </div>
+            
+            <div class="row g-4 mb-5">
+                <div class="col-6">
+                    <div class="bg-gray p-4 rounded-4 text-center">
+                        <h4 class="fw-bold mb-0" id="totalAcertos">0 / 10</h4>
+                        <p class="small text-muted mb-0">Total de Acertos</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-gray p-4 rounded-4 text-center">
+                        <h4 class="fw-bold mb-0" id="consistenciaIA">Alta</h4>
+                        <p class="small text-muted mb-0">Consistência IA</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card p-4 mb-5">
+                <h5 class="fw-bold mb-4">Análise Detalhada TRI</h5>
+                <canvas id="triChart" height="200"></canvas>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary px-5 py-3 rounded-pill fw-bold" onclick="location.reload()">Voltar aos Simulados</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer container py-5 mt-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
+                <img src="{% static 'core/assets/logo.png' %}" alt="Mindly Logo" class="footer-logo mb-3">
+                <p class="text-muted mb-0">&copy; 2026 Mindly. Todos os direitos reservados.</p>
+            </div>
+            <div class="col-lg-6 text-center text-lg-end social-links">
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <a href="#"><i class="bi bi-linkedin"></i></a>
+                <a href="#"><i class="bi bi-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="{% static 'core/js/theme.js' %}"></script>
+    <!-- Base de Conhecimento para Treinamento de IA -->
+    <script src="{% static 'core/js/knowledge_base.js' %}"></script>
+
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        /**
+         * LÓGICA DE SIMULADOS ELITE (TRI + TEMPO)
+         */
+        const questoes = [
+            { id: 1, dif: 'fácil', txt: 'Uma lâmpada de 100W fica acesa por 5h. Qual o consumo em kWh?', options: ['0.5', '5.0', '1.0', '10.0', '0.1'], correct: 0 },
+            { id: 2, dif: 'fácil', txt: 'O que caracteriza uma mistura homogênea?', options: ['Uma fase', 'Duas fases', 'Três fases', 'Sólido+Líquido', 'Incolor'], correct: 0 },
+            { id: 3, dif: 'média', txt: 'A aceleração da gravidade na Terra é aproximadamente:', options: ['9.8 m/s²', '1.6 m/s²', '30 m/s²', '0 m/s²', '12 m/s²'], correct: 0 },
+            { id: 4, dif: 'fácil', txt: 'Quem descobriu a América?', options: ['Cristóvão Colombo', 'Pedro Álvares Cabral', 'Dom Pedro I', 'Napoleão', 'Platão'], correct: 0 },
+            { id: 5, dif: 'média', txt: 'Qual o valor de log(100)?', options: ['2', '1', '10', '100', '0'], correct: 0 },
+            { id: 6, dif: 'difícil', txt: 'O efeito fotoelétrico confirmou qual natureza da luz?', options: ['Particulada', 'Ondulatória', 'Térmica', 'Estática', 'Quântica'], correct: 0 },
+            { id: 7, dif: 'difícil', txt: 'A segunda lei da termodinâmica trata de:', options: ['Entropia', 'Entalpia', 'Fusão', 'Inércia', 'Gravidade'], correct: 0 },
+            { id: 8, dif: 'média', txt: 'Qual organela realiza a respiração celular?', options: ['Mitocôndria', 'Ribossomo', 'Lidossomo', 'Cloroplasto', 'Núcleo'], correct: 0 },
+            { id: 9, dif: 'difícil', txt: 'Quem propôs a teoria da relatividade geral?', options: ['Einstein', 'Newton', 'Galileu', 'Hawking', 'Curie'], correct: 0 },
+            { id: 10, dif: 'fácil', txt: 'A fórmula da água é:', options: ['H2O', 'CO2', 'NaCl', 'O2', 'H2SO4'], correct: 0 }
+        ];
+
+        let currentQIndex = 0;
+        let answers = Array(10).fill(null);
+        let qTimerVal = 0;
+        let totalTimerVal = 0;
+        let qInterval, totalInterval;
+
+        function iniciarSimuladoReal() {
+            document.getElementById('provaOverlay').style.display = 'block';
+            renderQuestao();
+            iniciarTimers();
+        }
+
+        function iniciarTimers() {
+            qInterval = setInterval(() => {
+                qTimerVal++;
+                document.getElementById('qTimer').innerText = formatTime(qTimerVal);
+            }, 1000);
+
+            totalInterval = setInterval(() => {
+                totalTimerVal++;
+                document.getElementById('totalTimer').innerText = formatTime(totalTimerVal);
+            }, 1000);
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        function renderQuestao() {
+            const q = questoes[currentQIndex];
+            qTimerVal = 0; // Reset timer por questão
+            
+            const html = `
+                <div class="pergunta-card">
+                    <div class="question-meta">
+                        <span>Questão ${q.id} • Enem Original</span>
+                        <span class="badge ${getDifClass(q.dif)}">${q.dif}</span>
+                    </div>
+                    <h3 class="fw-bold mb-5">${q.txt}</h3>
+                    <div class="alternativas">
+                        ${q.options.map((opt, i) => `
+                            <div class="alternativa-item ${answers[currentQIndex] === i ? 'selected' : ''}" onclick="selectOption(${i})">
+                                <span class="option-letter">${String.fromCharCode(65 + i)}</span>
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('questionContainer').innerHTML = html;
+            document.getElementById('currentQNum').innerText = currentQIndex + 1;
+            
+            document.getElementById('btnNext').innerText = currentQIndex === 9 ? 'Finalizar Prova' : 'Próxima';
+        }
+
+        function getDifClass(dif) {
+            if(dif === 'fácil') return 'dificuldade-facil';
+            if(dif === 'média') return 'dificuldade-media';
+            return 'dificuldade-dificil';
+        }
+
+        function selectOption(i) {
+            answers[currentQIndex] = i;
+            renderQuestao();
+        }
+
+        function mudarQuestao(dir) {
+            if (currentQIndex === 9 && dir === 1) {
+                finalizarProva();
+                return;
+            }
+            if (currentQIndex === 0 && dir === -1) return;
+            
+            currentQIndex += dir;
+            renderQuestao();
+        }
+
+        function finalizarProvaPrecoce() {
+            if(confirm('Tem certeza que deseja sair? Seu progresso nesta prova será perdido.')) {
+                clearInterval(qInterval);
+                clearInterval(totalInterval);
+                document.getElementById('provaOverlay').style.display = 'none';
+            }
+        }
+
+        function finalizarProva() {
+            clearInterval(qInterval);
+            clearInterval(totalInterval);
+            
+            // LÓGICA TRI (Simplificada para Elite)
+            let acertosFacil = 0, acertosMedia = 0, acertosDificil = 0;
+            let totalFacil = 0, totalMedia = 0, totalDificil = 0;
+            
+            questoes.forEach((q, i) => {
+                const acertou = answers[i] === q.correct;
+                if(q.dif === 'fácil') { totalFacil++; if(acertou) acertosFacil++; }
+                if(q.dif === 'média') { totalMedia++; if(acertou) acertosMedia++; }
+                if(q.dif === 'difícil') { totalDificil++; if(acertou) acertosDificil++; }
+            });
+
+            // Fator de Consistência: Se errar fácil mas acertar difícil, a consistência cai
+            const consistencia = (acertosFacil / totalFacil) >= (acertosDificil / totalDificil) ? 1.0 : 0.6;
+            
+            // Peso TRI
+            const nota = ((acertosFacil * 400 + acertosMedia * 700 + acertosDificil * 900) / 10) * consistencia;
+            const finalNota = Math.round(nota + 200); // Base de 200 pontos do ENEM
+
+            exibirResultadoTRI(finalNota, acertosFacil+acertosMedia+acertosDificil, consistencia);
+        }
+
+        function exibirResultadoTRI(nota, total, consistencia) {
+            document.getElementById('resultadoTRIOverlay').style.display = 'block';
+            document.getElementById('notaTRIValue').innerText = `${nota} Pontos`;
+            document.getElementById('totalAcertos').innerText = `${total} / 10`;
+            document.getElementById('consistenciaIA').innerText = consistencia === 1 ? 'ALTA (Coerente)' : 'BAIXA (Chute detectado)';
+            document.getElementById('consistenciaIA').className = consistencia === 1 ? 'fw-bold text-success' : 'fw-bold text-danger';
+
+            // Gráfico TRI
+            const ctx = document.getElementById('triChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Fácil', 'Média', 'Difícil'],
+                    datasets: [{
+                        label: 'Seu Desempenho',
+                        data: [80, 50, 20], // Simulação visual baseada na categoria
+                        borderColor: '#EF4423',
+                        backgroundColor: 'rgba(239, 68, 35, 0.2)'
+                    }]
+                },
+                options: {
+                    scales: { r: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+    </script>
+    <!-- Botão Flutuante Mindly IA -->
+    <a href="{% url 'core:chat' %}" class="floating-ai-btn hover-pulse" title="Pergunte ao Mindly Brain">
+        <i class="bi bi-robot"></i>
+    </a>
+
+    <style>
+        .floating-ai-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .floating-ai-btn:hover {
+            transform: scale(1.1);
+            color: white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Mindly</title>
+    <link rel="icon" href="{% static 'core/assets/logo.png' %}" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const temaSalvo = localStorage.getItem('theme');
+        const prefereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const temaInicial = temaSalvo || (prefereDark ? 'dark' : 'light');
+        if (temaInicial === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Proteção de Rota (Simulação de Login)
+            const userLogged = localStorage.getItem('mindly_user_logged');
+            if(userLogged !== 'Alex') {
+                window.location.href = "{% url 'core:login' %}";
+            }
+
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ 
+                    duration: 400, 
+                    once: true,
+                    disable: 'mobile' 
+                });
+            }
+        });
+    </script>
+    <style>
+        :root {
+            --sidebar-width: 260px;
+        }
+        body { background-color: var(--bg-body); overflow-x: hidden; }
+        
+        .dashboard-container { display: flex; min-height: 100vh; }
+        
+        /* Main Content Unificado */
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-link-custom:hover, .nav-link-custom.active {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary-color);
+        }
+        
+        .nav-link-custom i { font-size: 1.2rem; margin-right: 1rem; }
+
+        /* Removendo margem da sidebar */
+        .main-content {
+            margin-left: 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover { transform: translateY(-5px); }
+
+        .streak-badge {
+            background: linear-gradient(135deg, #FF9800, #F44336);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .badge-item {
+            width: 60px;
+            height: 60px;
+            background: var(--bg-body);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 0.8rem;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .badge-item:hover { border-color: var(--primary-color); transform: scale(1.1); }
+        .badge-locked { filter: grayscale(1); opacity: 0.5; }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR UNIFICADA -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid" style="max-width: 1300px;">
+            <a class="navbar-brand logo-container" href="{% url 'core:dashboard' %}">
+                <img src="{% static 'core/assets/logo.png' %}" alt="Mindly Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto ms-4">
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:materias' %}">Matérias</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:simulados' %}">Simulados</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:ferramentas' %}">Ferramentas</a></li>
+                </ul>
+                <div class="d-flex align-items-center auth-links">
+                    <a href="{% url 'core:perfil' %}" class="d-flex align-items-center text-decoration-none me-3 border-end pe-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" class="rounded-circle border border-2 border-primary me-2" width="35" height="35" id="navAvatar">
+                        <span class="fw-bold small d-none d-lg-inline" style="color: var(--text-main);">Alex</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="contents-wrapper">
+        <main class="container-fluid py-4" style="max-width: 1200px;">
+            
+            <!-- HEADER DE PERFIL E XP -->
+            <div class="dashboard-header animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="row align-items-center">
+                    <div class="col-md-auto text-center mb-3 mb-md-0">
+                        <div class="position-relative d-inline-block">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" 
+                                 alt="Avatar" id="userAvatar" 
+                                 class="rounded-circle border border-4 border-primary shadow" 
+                                 width="100" height="100"
+                                 onclick="abrirModalAvatar()" style="cursor: pointer;">
+                            <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-primary" id="userLevelBadge" style="font-size: 0.9rem; padding: 0.5rem 0.8rem; border: 3px solid var(--card-bg);">
+                                LVL 14
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md text-center text-md-start">
+                        <h2 class="fw-800 mb-1" style="color: var(--text-main);">Olá, Alex! 👋</h2>
+                        <div class="d-flex flex-wrap justify-content-center justify-content-md-start align-items-center gap-3">
+                            <div class="streak-badge">
+                                <i class="bi bi-fire"></i> 12 dias de foco
+                            </div>
+                            <span class="text-muted small fw-bold" id="xpText">1450 / 2800 XP</span>
+                        </div>
+                        <div class="xp-bar-container">
+                            <div class="xp-bar-fill" id="xpProgressBar" style="width: 52%;"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-auto text-center mt-3 mt-md-0">
+                        <a href="{% url 'core:simulados' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">
+                            <i class="bi bi-play-fill me-1"></i> Continuar Estudando
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRADE DE ESTATÍSTICAS -->
+            <div class="stat-grid animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="stat-item">
+                    <i class="bi bi-check-circle-fill text-success mb-2 d-block fs-4"></i>
+                    <span class="stat-value">342</span>
+                    <span class="stat-label">Questões</span>
+                </div>
+                <div class="stat-item">
+                    <i class="bi bi-hourglass-split text-primary mb-2 d-block fs-4"></i>
+                    <span class="stat-value">48h</span>
+                    <span class="stat-label">Estudo</span>
+                </div>
+                <div class="stat-item">
+                    <i class="bi bi-layers-fill text-warning mb-2 d-block fs-4"></i>
+                    <span class="stat-value">85</span>
+                    <span class="stat-label">Flashcards</span>
+                </div>
+                <div class="stat-item">
+                    <i class="bi bi-star-fill text-danger mb-2 d-block fs-4"></i>
+                    <span class="stat-value">920</span>
+                    <span class="stat-label">Redação</span>
+                </div>
+            </div>
+
+            <div class="row g-4 animate-fade-in" style="animation-delay: 0.3s;">
+                <!-- GRÁFICO DE DESEMPENHO -->
+                <div class="col-lg-8">
+                    <div class="performance-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Seu Desempenho (TRI)</h5>
+                            <select class="form-select form-select-sm w-auto border-0 bg-gray" style="font-size: 0.8rem;">
+                                <option>Geral</option>
+                                <option>Últimos 30 dias</option>
+                            </select>
+                        </div>
+                        <div class="radar-wrapper">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FERRAMENTAS E PRO -->
+                <div class="col-lg-4">
+                    <div class="stat-card mb-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-grid-fill me-2 text-primary"></i>Acesso Rápido</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{% url 'core:flashcards' %}" class="btn btn-light w-100 py-3 rounded-4 border-0">
+                                    <i class="bi bi-layers d-block mb-1 fs-5 text-success"></i>
+                                    <span class="small fw-bold">Flashcards</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'core:pomodoro' %}" class="btn btn-light w-100 py-3 rounded-4 border-0">
+                                    <i class="bi bi-clock d-block mb-1 fs-5 text-danger"></i>
+                                    <span class="small fw-bold">Pomodoro</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'core:cronograma' %}" class="btn btn-light w-100 py-3 rounded-4 border-0">
+                                    <i class="bi bi-calendar-event d-block mb-1 fs-5 text-primary"></i>
+                                    <span class="small fw-bold">Agenda</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'core:redacao-ia' %}" class="btn btn-light w-100 py-3 rounded-4 border-0">
+                                    <i class="bi bi-magic d-block mb-1 fs-5 text-warning"></i>
+                                    <span class="small fw-bold">IA Redação</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card h-auto p-4" id="upgradeCard" style="background: linear-gradient(135deg, rgba(239, 68, 35, 0.1), rgba(255, 160, 0, 0.1)); border: 1px solid rgba(239, 68, 35, 0.2);">
+                        <div class="text-center">
+                            <i class="bi bi-gem text-warning fs-1 mb-3"></i>
+                            <h5 class="fw-bold mb-2">Mindly Pro</h5>
+                            <p class="small text-muted mb-4 text-center">Desbloqueie simulados TRI ilimitados e análise profunda de IA.</p>
+                            <a href="{% url 'core:premium' %}" class="btn btn-premium rounded-pill py-2 w-100 fw-bold">Upgrade agora</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'core/js/theme.js' %}"></script>
+    <script>
+
+        // --- SISTEMA DE GAMIFICAÇÃO (ELITE ENGINE) ---
+        const gameState = {
+            xp: parseInt(localStorage.getItem('mindly_xp')) || 1450,
+            level: parseInt(localStorage.getItem('mindly_level')) || 14,
+            avatar: localStorage.getItem('mindly_avatar') || 'Alex',
+            isPro: localStorage.getItem('mindly_pro') === 'true'
+        };
+
+        function updateGamificationUI() {
+            const xpNextLevel = gameState.level * 200; 
+            const progress = (gameState.xp / xpNextLevel) * 100;
+            
+            if(document.getElementById('userLevelBadge')) document.getElementById('userLevelBadge').innerText = `LVL ${gameState.level}`;
+            if(document.getElementById('xpProgressBar')) document.getElementById('xpProgressBar').style.width = `${progress}%`;
+            if(document.getElementById('xpText')) document.getElementById('xpText').innerText = `${gameState.xp} / ${xpNextLevel} XP`;
+            if(document.getElementById('userAvatar')) document.getElementById('userAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${gameState.avatar}`;
+            
+            // Lógica Pro
+            if(gameState.isPro) {
+                const userAvatar = document.getElementById('userAvatar');
+                if(userAvatar) {
+                    userAvatar.classList.add('border-warning');
+                    userAvatar.classList.remove('border-primary');
+                }
+                const navAvatar = document.getElementById('navAvatar');
+                if(navAvatar) {
+                    navAvatar.classList.add('border-warning');
+                    navAvatar.classList.remove('border-primary');
+                }
+                const levelBadge = document.getElementById('userLevelBadge');
+                if(levelBadge) levelBadge.classList.add('bg-warning', 'text-dark');
+                
+                const upgradeCard = document.getElementById('upgradeCard');
+                if(upgradeCard) {
+                    upgradeCard.innerHTML = `
+                        <div class="text-warning fw-bold text-center py-4">
+                            <i class="bi bi-shield-fill-check fs-1"></i>
+                            <p class="mb-0 mt-2">ASSINANTE PRO</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Atualizar nível nos outros cards se houver
+            const lvlElement = document.querySelector('h3[style*="color: #9C27B0;"]');
+            if(lvlElement) lvlElement.innerText = `LVL ${gameState.level}`;
+        }
+
+        function addXP(amount) {
+            gameState.xp += amount;
+            const xpNextLevel = gameState.level * 200;
+            
+            if (gameState.xp >= xpNextLevel) {
+                gameState.xp -= xpNextLevel;
+                gameState.level++;
+                mostrarNotifyLevelUp();
+            }
+            
+            localStorage.setItem('mindly_xp', gameState.xp);
+            localStorage.setItem('mindly_level', gameState.level);
+            updateGamificationUI();
+        }
+
+        function mostrarNotifyLevelUp() {
+            // Criar um brinde visual simples
+            const alert = document.createElement('div');
+            alert.className = 'position-fixed top-0 start-50 translate-middle-x mt-4 animate-fade-in z-3';
+            alert.style.zIndex = '9999';
+            alert.innerHTML = `
+                <div class="alert alert-success border-0 shadow-lg p-4 rounded-4 d-flex align-items-center" style="background: linear-gradient(45deg, #4CAF50, #81C784); color: white;">
+                    <i class="bi bi-trophy-fill fs-2 me-3 animate-pulse"></i>
+                    <div>
+                        <h5 class="fw-bold mb-0">LEVEL UP! 🚀</h5>
+                        <p class="mb-0 small">Você alcançou o Nível ${gameState.level}!</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 4000);
+        }
+
+        function abrirModalAvatar() {
+            const seeds = ['Alex', 'Charlie', 'Bibi', 'Joy', 'Midnight', 'Spooky'];
+            const container = document.createElement('div');
+            container.className = 'modal-backdrop fade show';
+            container.innerHTML = `
+                <div class="modal fade show d-block" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 rounded-4 shadow-lg" style="background: var(--bg-card); color: var(--text-main);">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-800">Escolha seu Avatar de Elite</h5>
+                                <button type="button" class="btn-close" onclick="this.closest('.modal-backdrop').remove()"></button>
+                            </div>
+                            <div class="modal-body text-center py-4">
+                                <div class="d-flex flex-wrap justify-content-center gap-3">
+                                    ${seeds.map(s => `
+                                        <div class="avatar-option p-2 rounded-4 border-2 border" 
+                                             style="cursor: pointer; transition: 0.3s; ${gameState.avatar === s ? 'border-color: var(--primary-color);' : 'border-color: var(--border-color);'}"
+                                             onclick="setAvatar('${s}')">
+                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${s}" width="60" class="rounded-circle">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(container);
+        }
+
+        window.setAvatar = (seed) => {
+            if (window.setMindlyAvatar) {
+                window.setMindlyAvatar(seed);
+                gameState.avatar = seed; // Atualiza estado local do dashboard
+            } else {
+                gameState.avatar = seed;
+                localStorage.setItem('mindly_avatar', seed);
+                updateGamificationUI();
+            }
+            document.querySelector('.modal-backdrop').remove();
+        };
+
+        // Init
+        window.addEventListener('load', () => {
+            updateGamificationUI();
+        });
+
+        // Simulação de XP aleatória para teste
+        // addXP(50);
+
+        // --- Gráfico de Desempenho (RADAR) ---
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const colorPrimary = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#EF4423';
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Matemática', 'Natureza', 'Humanas', 'Linguagens', 'Redação'],
+                datasets: [{
+                    label: 'Sua Força',
+                    data: [85, 70, 92, 78, 95],
+                    backgroundColor: 'rgba(239, 68, 35, 0.2)',
+                    borderColor: colorPrimary,
+                    pointBackgroundColor: colorPrimary,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: colorPrimary,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(128, 128, 128, 0.2)' },
+                        grid: { color: 'rgba(128, 128, 128, 0.2)' },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: { display: false },
+                        pointLabels: {
+                            color: '#888',
+                            font: { size: 11, weight: '600' }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
